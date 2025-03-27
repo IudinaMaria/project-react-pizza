@@ -1,22 +1,32 @@
 import React from "react";
+import { useSelector, useDispatch } from 'react-redux';
+import { setSort } from '../redux/slices/filterSlice';
 
-function Sort({ value, onChangeSort }) {
 
-  // для отображения списка сортировки и выбора сортировки
-  const list = [
-    {name: 'популярности(desc)', sortProperty: 'rating'}, 
-    {name: 'популярности(asc)', sortProperty: '-rating'},
-    {name: 'цене(desc)', sortProperty:'price'}, 
-    {name: 'цене(asc)', sortProperty:'-price'},
-    {name: 'алфавиту(desc)', sortProperty: 'title'},
-    {name: 'алфавиту(asc)', sortProperty: '-title'}
-  ];
+// для отображения списка сортировки и выбора сортировки
+const list = [
+  {name: 'популярности(desc)', sortProperty: 'rating'}, 
+  {name: 'популярности(asc)', sortProperty: '-rating'},
+  {name: 'цене(desc)', sortProperty:'price'}, 
+  {name: 'цене(asc)', sortProperty:'-price'},
+  {name: 'алфавиту(desc)', sortProperty: 'title'},
+  {name: 'алфавиту(asc)', sortProperty: '-title'}
+];
+
+function Sort() {
+
+  const dispatch = useDispatch(); // useDispatch - хук для отправки экшенов в стор
+  const sort = useSelector(state => state.filter.sort); // useSelector - хук для получения данных из стора для сортировки
+
+
+  
 
   // const [selected, setSelected] = React.useState(0); теперь это передается через пропсы глоабльно
   const [open, setOpen] = React.useState(false);
   // const sortName = list[value].name; по факту это тоже передается через пропсы глоабльно
-  const onClickListItem = (index) => {
-    onChangeSort(index);
+  const onClickListItem = (obj) => {
+    // onChangeSort(index);
+    dispatch(setSort(obj));
     setOpen(false);
   }
 
@@ -36,13 +46,13 @@ function Sort({ value, onChangeSort }) {
           />
         </svg>
         <b>Сортировка по:</b>
-        <span onClick={()=> setOpen(!open)}>{value.name}</span>
+        <span onClick={()=> setOpen(!open)}>{sort.name}</span>
       </div>
       {open && (
         <div className="sort__popup">
           <ul>
             {list.map((obj, index) => (
-              <li key={index} className={value.sortProperty === obj.sortProperty ? 'active' : ''} onClick={() => onClickListItem(obj)}>{obj.name}</li>
+              <li key={index} className={sort.sortProperty === obj.sortProperty ? 'active' : ''} onClick={() => onClickListItem(obj)}>{obj.name}</li>
             ))}
           </ul>
         </div>

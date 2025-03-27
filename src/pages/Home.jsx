@@ -1,5 +1,7 @@
 import React from "react";
+import { useSelector, useDispatch } from 'react-redux';
 
+import { setCategoryId } from '../redux/slices/filterSlice';
 import Categories from "../components/Categories";
 import Sort from "../components/Sort";
 import PizzaBlock from "../components/PizzaBlock/index";
@@ -8,6 +10,12 @@ import Pagination from "../components/Pagination/index";
 import { SearchContext } from "../App";
 
 const Home = () => {
+  const dispatch = useDispatch(); // useDispatch - хук для отправки экшенов в стор
+  const { categoryId, sort } = useSelector(state => state.filter); // useSelector - хук для получения данных из стора
+  const sortType = sort.sortProperty; // useSelector - хук для получения данных из стора для сортировки
+
+
+
 
   const { searchValue } = React.useContext(SearchContext);
 
@@ -16,19 +24,24 @@ const Home = () => {
   const [isLoaded, setIsLoaded] = React.useState(true);
 
   // для отображения списка категорий и выбора категории
-  const [categoryId, setCategoryId] = React.useState(0);
+ // const [categoryId, setCategoryId] = React.useState(0);
   const [currentPage, setcurrentPage] = React.useState(1);
-  const [sortType, setSortType] = React.useState({
-    name: 'популярности', sortProperty: 'rating'
-  });
+  // const [sortType, setSortType] = React.useState({
+  //   name: 'популярности', sortProperty: 'rating'
+ // });
+
+  const onChangeCategory = (id) => { // функция для изменения категории
+    dispatch(setCategoryId(id)); // отправляем в стор новое значение категории
+  }
+
 
   // для отображения списка сортировки и выбора сортировки через fetch
   React.useEffect(() => {
     setIsLoaded(true);
 
     // сортировка по возрастанию или убыванию в зависимости от выбора
-    const sortBy = sortType.sortProperty.replace('-','');
-    const order = sortType.sortProperty.includes('-') ? 'asc' : 'desc';
+    const sortBy = sortType.replace('-','');
+    const order = sortType.includes('-') ? 'asc' : 'desc';
     const category = categoryId > 0 ? `category=${categoryId}` : '';
     const search = searchValue ? `&search=${searchValue}` : '';
 
@@ -60,8 +73,8 @@ const Home = () => {
         <div className ="container">
           <div className ="content__top">
           {/* Получаем индекс категории при нажатии на категорию из Home. В  Categories(родительский) передали пропс */}
-          <Categories value={categoryId} onChangeCategory={(id) => setCategoryId(id)}/>
-            <Sort value={sortType} onChangeSort={(id) => setSortType(id)}/>
+          <Categories value={categoryId} onChangeCategory={onChangeCategory}/>
+            <Sort />
           </div>
           <h2 className ="content__title">Все пиццы</h2>
           <div className ="content__items">{isLoaded ? skeletons : pizzas }

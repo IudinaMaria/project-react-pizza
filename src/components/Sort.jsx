@@ -4,7 +4,7 @@ import { setSort } from '../redux/slices/filterSlice';
 
 
 // для отображения списка сортировки и выбора сортировки
-const list = [
+export const list = [
   {name: 'популярности(desc)', sortProperty: 'rating'}, 
   {name: 'популярности(asc)', sortProperty: '-rating'},
   {name: 'цене(desc)', sortProperty:'price'}, 
@@ -13,11 +13,11 @@ const list = [
   {name: 'алфавиту(asc)', sortProperty: '-title'}
 ];
 
-function Sort() {
+export function Sort() {
 
   const dispatch = useDispatch(); // useDispatch - хук для отправки экшенов в стор
   const sort = useSelector(state => state.filter.sort); // useSelector - хук для получения данных из стора для сортировки
-
+  const sortRef = React.useRef(); // useRef - хук для создания ссылки на элемент, чтобы не создавать лишний рендер
 
   
 
@@ -30,8 +30,22 @@ function Sort() {
     setOpen(false);
   }
 
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sortRef.current && !event.composedPath().includes(sortRef.current)) {
+        setOpen(false);
+      }
+    };
+  
+    document.body.addEventListener('click', handleClickOutside);
+  
+    return () => {
+      document.body.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="sort">
+    <div ref={sortRef} className="sort">
       <div className="sort__label">
         <svg
           width="10"

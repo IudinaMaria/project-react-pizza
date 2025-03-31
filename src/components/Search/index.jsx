@@ -1,11 +1,32 @@
 import React from "react";
 import { SearchContext } from "../../App";
+import debounce from "lodash.debounce"; // импортируем библиотеку lodash.debounce для дебаунса
+
 
 import styles from "./Search.module.scss";
 
 const Search = () => {
+  const [value, setValue] = React.useState(""); // создаем локальный стейт для значения поля ввода
+  const { setSearchValue} = React.useContext(SearchContext); // достаем из контекста значения
+  const inputRef = React.useRef(); // создаем реф для input
 
-  const { searchValue, setSearchValue} = React.useContext(SearchContext); // достаем из контекста значения
+  const onClickClear = () => { // очищаем поле ввода и фокусируем его
+    setSearchValue(""); // очищаем значение поля ввода
+    setValue(""); // очищаем значение поля ввода
+    inputRef.current.focus(); // фокусируем элемент input
+  }
+
+  const updateSearchValue = React.useCallback( // оборачиваем функцию в useCallback, чтобы не создавать новую функцию при каждом рендере
+    debounce((str) => {
+      setSearchValue(str); // обновляем значение поля ввода  
+    }, 250), // задержка 1000 мс
+    [], // массив зависимостей пустой, чтобы функция не пересоздавалась при каждом рендере
+   );
+
+  const onChangeInput = (event) => { // создаем функцию для обновления значения поля ввода
+    setValue(event.target.value); // обновляем значение поля ввода 
+    updateSearchValue(event.target.value); // обновляем значение в контексте 
+  }
 
   return (
     <div className={styles.root}>
@@ -25,13 +46,14 @@ const Search = () => {
         <line x1="21" x2="16.65" y1="21" y2="16.65" />
       </svg>
       <input
-        value={searchValue} // сохраняем значение введенное в поле ввода. input - это контролируемый компонент. Не будет этого и не сможем допустим очистить поле ввода
-        onChange={(event) => setSearchValue(event.target.value)} // обновляем значение введенное в поле ввода
+      ref={inputRef} // передаем реф-ссылка в input
+        value={value} // сохраняем значение введенное в поле ввода. input - это контролируемый компонент. Не будет этого и не сможем допустим очистить поле ввода
+        onChange={onChangeInput} // обновляем значение введенное в поле ввода
         className={styles.input}
         placeholder="Search..."
       />
-      {searchValue && (
-        <svg onClick={() => setSearchValue("")} // очищаем поле ввода
+      {value && (
+        <svg onClick={onClickClear} // очищаем поле ввода
       className={styles.clearIcon}
         fill="none"
         height="24"
